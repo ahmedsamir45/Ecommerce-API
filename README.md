@@ -139,22 +139,9 @@ STRIPE_SECRET_KEY=your-stripe-key
 STRIPE_PUBLIC_KEY=your-stripe-pub-key
 ```
 
-## Testing
 
-Run tests with:
-```bash
-python manage.py test
-```
 
-## Deployment
 
-### Heroku
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-### Docker
-```bash
-docker-compose up --build
-```
 
 ## Contributing
 
@@ -168,12 +155,9 @@ docker-compose up --build
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
-## Contact
 
-Your Name - [@yourtwitter](https://twitter.com/yourtwitter) - email@example.com
 
-Project Link: [https://github.com/yourusername/drf-ecommerce](https://github.com/yourusername/drf-ecommerce)
-```
+
 
 This README includes:
 
