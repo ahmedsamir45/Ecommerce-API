@@ -58,8 +58,8 @@ Interactive API documentation available at:
 ### Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/drf-ecommerce.git
-   cd drf-ecommerce
+   https://github.com/ahmedsamir45/Ecommerce-API.git
+   cd Ecommerce-API
    ```
 
 2. Create and activate virtual environment:
