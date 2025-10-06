@@ -114,3 +114,5 @@ cython_debug/
 # VS Code specific
 .history
 */**/.history
+
+frontend/node_modules/

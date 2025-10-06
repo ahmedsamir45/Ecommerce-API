@@ -102,12 +102,12 @@ class ProfileViewSet(ModelViewSet):
         return Response(
             {"message": "Profile created successfully", "data": serializer.data},
             status=HTTP_201_CREATED,
-            headers=headers
+            headers=headers,
         )
 
 class OrderviewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
-    
+
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
             return [IsAuthenticated()]
@@ -118,11 +118,11 @@ class OrderviewSet(ModelViewSet):
         order = self.get_object()
         if order.pending_status != 'P':
             raise ValidationError("This order is not pending payment")
-        
+
         amount = order.total_price
         email = request.user.email
         order_id = str(order.id)
-        
+
         try:
             session = stripe.checkout.Session.create(
                 payment_method_types=['card'],
@@ -146,7 +146,7 @@ class OrderviewSet(ModelViewSet):
             return Response({'session_url': session.url})
         except Exception as e:
             return Response({'error': str(e)}, status=HTTP_400_BAD_REQUEST)
-    
+
     @action(detail=True, methods=['GET'])
     def success_payment(self, request, pk=None):
         order = self.get_object()
@@ -162,154 +162,22 @@ class OrderviewSet(ModelViewSet):
         if self.request.method == "POST":
             return CreateOrderSerializer
         return orderSerializer
-    
+
     def get_serializer_context(self):
         return {"user_id": self.request.user.id}
-    
+
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return Order.objects.all().order_by('-placed_at')
         return Order.objects.filter(owner=user).order_by('-placed_at')
 
-
-
-
-##gineric
-"""
-class APIProducts(ListCreateAPIView):
-    queryset=Product.objects.all()
-    serializer_class = ProductSerializer
-
-class ApiProduct(RetrieveUpdateDestroyAPIView):
-    queryset=Product.objects.all()
-    serializer_class = ProductSerializer
-
-
-class APICategory(ListCreateAPIView):
-    queryset=Category.objects.all()
-    serializer_class = CategorySerializer
-
-class ApiCategories(RetrieveUpdateDestroyAPIView):
-    queryset=Category.objects.all()
-    serializer_class = CategorySerializer
-
-"""
-
-
-
-
-    
-### class based view
-"""class APIProducts(APIView):
-    def get(self, request):
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
-    def post(self,request):
-        serializer = ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    
-class ApiProduct(APIView):
-    def get(self, request, pk):
-        product = get_object_or_404(Product,id=pk)
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-    def put(self,request,pk):
-        product = get_object_or_404(Product,id=pk)
-        serializer = ProductSerializer(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    def delete(self,request,pk):
-        product = get_object_or_404(Product,id=pk)
-        product.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
-
-
-
-
-
-class APICategories(APIView):
-    def get(self, request):
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
-    def post(self,request):
-        serializer = CategorySerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    
-class ApiCategory(APIView):
-    def get(self, request, pk):
-        category = get_object_or_404(Category,category_id=pk)
-        serializer = CategorySerializer(category)
-        return Response(serializer.data)
-    def put(self,request,pk):
-        category = get_object_or_404(Category,category_id=pk)
-        serializer = CategorySerializer(category, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    def delete(self,request,pk):
-        category = get_object_or_404(Category,category_id=pk)
-        category.delete()
-        return Response(status=HTTP_204_NO_CONTENT)"""
-## functioon based view
-"""
-@api_view(['GET',"POST"])
-def api_products(request):
-    if request.method == 'GET':
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
-    if request.method=="POST":
-        serializer = ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.data)
-
-
-@api_view(['GET','PUT','DELETE'])
-def api_product(request, pk):
-    product = get_object_or_404(Product,id=pk)
-    if request.method =="GET":
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
-    if request.method =="PUT":
-        serializer = ProductSerializer(product, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-    if request.method == 'DELETE':
-        product.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
-
-
-
-@api_view(['GET','POST'])
-def api_categories(request):
-    if request.method == 'GET':
-        categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
-        return Response(serializer.data)
-    if request.method =='POST':
-        serializer = CategorySerializer(request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-@api_view(['DELETE','PUT','GET'])
-def api_category(request, pk):
-    category = get_object_or_404(Category,category_id=pk)
-    if request.method =='GET':
-        serializer = CategorySerializer(category)
-        return Response(serializer.data)
-    if request.method == 'PUT':
-        serializer = CategorySerializer(category, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-"""
+    def create(self, request, *args, **kwargs):
+        input_serializer = CreateOrderSerializer(
+            data=request.data,
+            context={'user_id': request.user.id}
+        )
+        input_serializer.is_valid(raise_exception=True)
+        order = input_serializer.save()
+        output = orderSerializer(order)
+        return Response(output.data, status=HTTP_201_CREATED)
